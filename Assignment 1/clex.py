@@ -8,7 +8,31 @@ import sys
 sys.path.insert(0,"../..")
 
 import ply.lex as lex
+import re
+import validatecomms
 
+
+#print validatecomms.Evaluate("/* /* */ /* */ /* */")
+
+# Test it out
+data = '''
+3 + %4 * 10
+  %+ -20 *2 :=
+3 + 4 * 10
+  + -20 *2 :=
+  if else ifso then30; kk
+   /*
+     Author:
+     Basic /* multi-l  with % single */line comments should work!
+     comments */
+
+    int i = 900;if 0; if1; if 2
+    /* /* uuuu*/ kkk*/
+
+    /* /* */i */love 444/* */ kkk
+
+
+'''
 
 
 # Reserved words
@@ -53,12 +77,77 @@ def t_ID(t):
 t_NUM = r'\d+([uU]|[lL]|[uU][lL]|[lL][uU])?'
 # r'\d+(\.\d*)?'), # Integer or decimal number
 
-comm_count = 0
 
-#  (recursive) multi-line comments
-def t_commentsa(t):
+
+#  (recursive) multi-line comments left
+def t_commentsl(t):
     r'/\*'
-    comm_count += 1
+    if len(lexer.comm_beyondpos) == 0:
+        #print lexer.lexpos
+        leftdata = data.split('/*', 1 )[1]
+
+        lcomms = [lcomm.start() for lcomm in re.finditer('/\*', leftdata)]
+        #print lcomms
+        rcomms = [rcomm.start() for rcomm in re.finditer('\*/', leftdata)]
+        #print rcomms
+        tmp = "/* "
+        lexer.comm_count += 1
+        nextPos = []
+
+        ll, rr = 0, 0
+        while(ll<len(lcomms) and rr<len(rcomms)):
+            if lcomms[ll] < rcomms[rr]:
+                tmp += "/* "
+                lexer.comm_count += 1
+
+                ll += 1
+            else:
+                tmp += "*/ "
+                lexer.comm_count -= 1
+
+                if(lexer.comm_count == 0):
+                    nextPos.append(lexer.lexpos + 2 + rcomms[rr])
+
+                rr += 1
+
+        while(ll < len(lcomms)):
+            tmp += "/* "
+            lexer.comm_count += 1
+
+            ll += 1
+
+        while(rr < len(rcomms)):
+            tmp += "*/ "
+            lexer.comm_count -= 1
+
+            if(lexer.comm_count == 0):
+                nextPos.append(lexer.lexpos + 2 + rcomms[rr])
+
+            rr += 1
+
+        #print nextPos
+        lexer.comm_beyondpos = nextPos
+
+        if not validatecomms.Evaluate(tmp):
+            print("Illegal multi-line comments")
+            sys.exit(0)
+        else:
+            lexer.lexpos = lexer.comm_beyondpos[0]
+            del lexer.comm_beyondpos[0]
+    else:
+        lexer.lexpos = lexer.comm_beyondpos[0]
+        del lexer.comm_beyondpos[0]
+
+
+# multi-line comments right
+def t_commentsr(t):
+    r'\*/'
+
+    t.lexer.comm_count -= 1
+    if(t.lexer.comm_count < 0):
+        print("Illegal multi-line comments")
+        sys.exit(0)
+
 #
 # #  (recursive) multi-line comments
 # def t_comments(t):
@@ -87,25 +176,12 @@ def t_comment(t):
     
 def t_error(t):
     print("Illegal character %s" % repr(t.value[0]))
+    sys.exit(0)
     t.lexer.skip(1)
 
 lexer = lex.lex()
-
-
-# Test it out
-data = '''
-3 + %4 * 10
-  %+ -20 *2 :=
-3 + 4 * 10
-  + -20 *2 :=
-  if else ifso then30; kk
-   /*
-     Author:
-     Basic /* multi-line comments  with % single line comments should work!
-     comments
-
-
-'''
+lexer.comm_count = 0
+lexer.comm_beyondpos = []
 
 # Give the lexer some input
 lexer.input(data)
@@ -116,12 +192,7 @@ while True:
     if not tok:
         break      # No more input
     print(tok)
-	#print(tok.type, tok.value, tok.lineno, tok.lexpos)
 
-#if __name__ == "__main__":
-#    lex.runmain(lexer)
-
-    
 
 
 
