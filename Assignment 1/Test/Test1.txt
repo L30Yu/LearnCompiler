@@ -1,0 +1,15 @@
+3 + %4 * 10
+  %+ -20 *2 :=
+3 + 4 * 10
+  + -20 *2 :=
+  if else ifso then30; 30kk
+   /*
+     Author:
+     Basic /* multi-l  with % single */line comments should work!
+     comments */
+
+    int i = 900;if 0; if1; if 2
+    /* /* uuuu*/ kkk*/
+
+    /* /* */i */love 444/* */ kkk
+

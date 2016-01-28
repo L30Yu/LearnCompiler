@@ -1,8 +1,8 @@
-# ----------------------------------------------------------------------
-# clex.py
-#
-# A lexer for ANSI C.
-# ----------------------------------------------------------------------
+# CPSC 411 Winter 2016
+# Assignment 1
+# Delei Yu
+# 10061950
+# dyu@ucalgary.ca
 
 import sys
 sys.path.insert(0,"../..")
@@ -11,29 +11,12 @@ import ply.lex as lex
 import re
 import validatecomms
 
-
-#print validatecomms.Evaluate("/* /* */ /* */ /* */")
-
-# Test it out
-data = '''
-3 + %4 * 10
-  %+ -20 *2 :=
-3 + 4 * 10
-  + -20 *2 :=
-  if else ifso then30; kk
-   /*
-     Author:
-     Basic /* multi-l  with % single */line comments should work!
-     comments */
-
-    int i = 900;if 0; if1; if 2
-    /* /* uuuu*/ kkk*/
-
-    /* /* */i */love 444/* */ kkk
-
-
-'''
-
+# check input arguments and read txt file
+if(len(sys.argv) != 2):
+    print "Please input a testing file path"
+    sys.exit(0)
+file = open(sys.argv[1], "r+")
+data = file.read()
 
 # Reserved words
 reserved = (
@@ -74,10 +57,8 @@ def t_ID(t):
     return t
 
 # Integer literal
-t_NUM = r'\d+([uU]|[lL]|[uU][lL]|[lL][uU])?'
+t_NUM = r'\d+(\d*)?'
 # r'\d+(\.\d*)?'), # Integer or decimal number
-
-
 
 #  (recursive) multi-line comments left
 def t_commentsl(t):
@@ -85,6 +66,11 @@ def t_commentsl(t):
     if len(lexer.comm_beyondpos) == 0:
         #print lexer.lexpos
         leftdata = data.split('/*', 1 )[1]
+
+        def repl(m):
+            return '#' * len(m.group())
+
+        leftdata = re.sub(r"\%.*?\n", repl, leftdata)
 
         lcomms = [lcomm.start() for lcomm in re.finditer('/\*', leftdata)]
         #print lcomms
@@ -132,10 +118,14 @@ def t_commentsl(t):
             print("Illegal multi-line comments")
             sys.exit(0)
         else:
+            tmppos = lexer.lexpos
             lexer.lexpos = lexer.comm_beyondpos[0]
+            lexer.lineno += data[tmppos : lexer.lexpos].count('\n')
             del lexer.comm_beyondpos[0]
     else:
+        tmppos = lexer.lexpos
         lexer.lexpos = lexer.comm_beyondpos[0]
+        lexer.lineno += data[tmppos : lexer.lexpos].count('\n')
         del lexer.comm_beyondpos[0]
 
 
@@ -148,32 +138,11 @@ def t_commentsr(t):
         print("Illegal multi-line comments")
         sys.exit(0)
 
-#
-# #  (recursive) multi-line comments
-# def t_comments(t):
-#     r'/\*(.|\n)*?\*/'
-#     if(t.value.find('/*') > 1):
-#         print "Error Multiple Comments used"
-#
-#     print("CCCC")
-# #    t.lexer.lineno += t.value.count('\n')
-#
-# #  (recursive) multi-line comments
-# def t_commentsb(t):
-#     r'/\*(.|\n)*?/\*'
-#     if(t.value.find('*/') == -1):
-#         print "Error Multiple Comments used"
-#
-#     print("CCCC")
-# #    t.lexer.lineno += t.value.count('\n')
-
-
-
 #one-line comments:      %
 def t_comment(t):
     r'\%(.)*?\n'
     t.lexer.lineno += 1
-    
+
 def t_error(t):
     print("Illegal character %s" % repr(t.value[0]))
     sys.exit(0)
@@ -183,7 +152,8 @@ lexer = lex.lex()
 lexer.comm_count = 0
 lexer.comm_beyondpos = []
 
-# Give the lexer some input
+
+# Give the lexer input
 lexer.input(data)
 
 # Tokenize
@@ -191,8 +161,7 @@ while True:
     tok = lexer.token()
     if not tok:
         break      # No more input
-    print(tok)
-
+    print("TOKEN", tok.type, tok.value, (tok.lineno), (tok.lexpos))
 
 
 
