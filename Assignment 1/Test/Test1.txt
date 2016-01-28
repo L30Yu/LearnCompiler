@@ -1,7 +1,7 @@
 3 + %4 * 10
   %+ -20 *2 :=
-3 + 4 * 10
-  + -20 *2 :=
+3 + 4 * 10 % one line comment with /*
+  + -20 *2 :=  % one line comment with */
   if else ifso then30; 30kk
    /*
      Author:

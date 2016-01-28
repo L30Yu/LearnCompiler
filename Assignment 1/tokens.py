@@ -9,6 +9,8 @@ sys.path.insert(0,"../..")
 
 import ply.lex as lex
 import re
+
+# my own multi-line comments validation
 import validatecomms
 
 # check input arguments and read txt file
@@ -22,7 +24,7 @@ data = file.read()
 reserved = (
     'IF', 'THEN', 'WHILE', 'DO', 'INPUT', 'ELSE', 'BEGIN','END','WRITE',
     )
-
+# Tokens
 tokens = reserved + (
     'ID', 'NUM','ADD','ASSIGN','SUB','MUL','DIV','LPAR','RPAR','SEMICOLON',
     )
@@ -46,7 +48,6 @@ t_RPAR             = r'\)'
 t_SEMICOLON        = r';'
 
 # Identifiers and reserved words
-
 reserved_map = { }
 for r in reserved:
     reserved_map[r.lower()] = r
@@ -63,72 +64,32 @@ t_NUM = r'\d+(\d*)?'
 #  (recursive) multi-line comments left
 def t_commentsl(t):
     r'/\*'
+
+    # check if already have all the start position of multi-line comments
     if len(lexer.comm_beyondpos) == 0:
-        #print lexer.lexpos
+
+        # split and return the data after the first /*
         leftdata = data.split('/*', 1 )[1]
 
-        def repl(m):
-            strtmp = str(m.group())
-            if "/*" in strtmp:
-                strtmp = strtmp.replace("/*","/#")
+        # validate the comments marks
+        evaluateResult = validatecomms.evaluate(lexer, leftdata)
+        # all the comments ending position after evaluate
+        lexer.comm_beyondpos = evaluateResult[1]
 
-            if "*/" in strtmp:
-                strtmp = strtmp.replace("*/","#/")
-            return strtmp
-
-        leftdata = re.sub(r"\%.*?\n", repl, leftdata)
-
-        lcomms = [lcomm.start() for lcomm in re.finditer('/\*', leftdata)]
-        #print lcomms
-        rcomms = [rcomm.start() for rcomm in re.finditer('\*/', leftdata)]
-        #print rcomms
-        tmp = "/* "
-        lexer.comm_count += 1
-        nextPos = []
-
-        ll, rr = 0, 0
-        while(ll<len(lcomms) and rr<len(rcomms)):
-            if lcomms[ll] < rcomms[rr]:
-                tmp += "/* "
-                lexer.comm_count += 1
-
-                ll += 1
-            else:
-                tmp += "*/ "
-                lexer.comm_count -= 1
-
-                if(lexer.comm_count == 0):
-                    nextPos.append(lexer.lexpos + 2 + rcomms[rr])
-
-                rr += 1
-
-        while(ll < len(lcomms)):
-            tmp += "/* "
-            lexer.comm_count += 1
-
-            ll += 1
-
-        while(rr < len(rcomms)):
-            tmp += "*/ "
-            lexer.comm_count -= 1
-
-            if(lexer.comm_count == 0):
-                nextPos.append(lexer.lexpos + 2 + rcomms[rr])
-
-            rr += 1
-
-        #print nextPos
-        lexer.comm_beyondpos = nextPos
-
-        if not validatecomms.Evaluate(tmp):
+        # evaluate the pairs of the comment marks
+        if not validatecomms.evaluatePairs(evaluateResult[0]):
             print("Illegal multi-line comments")
             sys.exit(0)
         else:
             tmppos = lexer.lexpos
+            # set the lexer position to the end of the comments
             lexer.lexpos = lexer.comm_beyondpos[0]
+            # calculate the lines inside of this part of comments
             lexer.lineno += data[tmppos : lexer.lexpos].count('\n')
+            # delete this used ending position
             del lexer.comm_beyondpos[0]
     else:
+        # if already have the comments ending positions, just jump to the end position
         tmppos = lexer.lexpos
         lexer.lexpos = lexer.comm_beyondpos[0]
         lexer.lineno += data[tmppos : lexer.lexpos].count('\n')
@@ -140,17 +101,18 @@ def t_commentsr(t):
     r'\*/'
 
     t.lexer.comm_count -= 1
+    # if right of multi-line comments occure first
     if(t.lexer.comm_count < 0):
         print("Illegal multi-line comments")
         sys.exit(0)
 
-#one-line comments:      %
+# one-line comments % and end with \n
 def t_comment(t):
     r'\%(.)*?\n'
     t.lexer.lineno += 1
 
 
-# only one-line comment mark  %
+# only one-line comment mark  % no end of \n
 def t_commentonly(t):
     r'\%(.)*?'
 
@@ -160,7 +122,9 @@ def t_error(t):
     t.lexer.skip(1)
 
 lexer = lex.lex()
+# add comments counter in the lexer
 lexer.comm_count = 0
+# add comments ending position list in the lexer
 lexer.comm_beyondpos = []
 
 
