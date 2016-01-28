@@ -68,7 +68,13 @@ def t_commentsl(t):
         leftdata = data.split('/*', 1 )[1]
 
         def repl(m):
-            return '#' * len(m.group())
+            strtmp = str(m.group())
+            if "/*" in strtmp:
+                strtmp = strtmp.replace("/*","/#")
+
+            if "*/" in strtmp:
+                strtmp = strtmp.replace("*/","#/")
+            return strtmp
 
         leftdata = re.sub(r"\%.*?\n", repl, leftdata)
 
@@ -143,8 +149,13 @@ def t_comment(t):
     r'\%(.)*?\n'
     t.lexer.lineno += 1
 
+
+# only one-line comment mark  %
+def t_commentonly(t):
+    r'\%(.)*?'
+
 def t_error(t):
-    print("Illegal character %s" % repr(t.value[0]))
+    print("Illegal character %s" % repr(t.value[0]), t.lexer.lineno)
     sys.exit(0)
     t.lexer.skip(1)
 

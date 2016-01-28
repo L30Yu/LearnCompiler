@@ -33,5 +33,5 @@ end
 
  */
 
-print x;  */%aaa%
+print x;  */ yyy %aaa%
 %

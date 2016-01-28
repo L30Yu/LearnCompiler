@@ -11,5 +11,5 @@
     int i = 900;if 0; if1; if 2
     /* /* uuuu*/ kkk*/
 
-    /* /* */i */love 444/* */ kkk
+    /* /* */i */love 444 */ kkk
 
