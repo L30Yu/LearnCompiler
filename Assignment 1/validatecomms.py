@@ -1,3 +1,13 @@
+# CPSC 411 Winter 2016
+# Assignment 1
+# Delei Yu
+# 10061950
+# dyu@ucalgary.ca
+#
+# validatecomms.py
+# validate the recursive multi-line comments /*  */
+#
+
 import sys
 import re
 

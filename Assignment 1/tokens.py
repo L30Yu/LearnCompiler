@@ -3,6 +3,10 @@
 # Delei Yu
 # 10061950
 # dyu@ucalgary.ca
+#
+# tokens.py
+# use lex to define tokens
+#
 
 import sys
 sys.path.insert(0,"../..")
