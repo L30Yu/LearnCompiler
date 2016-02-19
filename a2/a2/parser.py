@@ -10,7 +10,7 @@ class ExpressionEvaluator:
     implements a single grammar rule. Use the ._accept() method
     to test and accept the current lookahead token. Use the ._expect()
     method to exactly match and discard the next token on on the input
-    (or raise a SyntaxError if it doesn't match).
+    (or raise a SyntaxError 'Line: '+if it doesn't match ).
     '''
 
     def parse(self, text):
@@ -24,8 +24,16 @@ class ExpressionEvaluator:
         self._advance()  # Load first lookahead token
         self.vardic = {}
 
-        ast = self.expr()
-        print(ast)
+        ast = self.stmt()
+        result = str(ast)
+        print result
+        # self.minPrint(result)
+
+    def minPrint(self, str):
+        import csv
+        reader = csv.reader(str)
+        for column in zip(*reader):
+            print column
 
     def _advance(self):
         'Advance one token ahead'
@@ -42,60 +50,88 @@ class ExpressionEvaluator:
     def _expect(self, toktype):
         'Consume next token if it matches toktype or raise SyntaxError'
         if not self._accept(toktype):
-            raise SyntaxError('Expected ' + toktype)
+            raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + toktype)
 
     def stmt(self):
         if self._accept('IF'):
-            exprval = self.expr()
-            self._expect('THEN')
-            if exprval:
-                stmtval = self.stmt()
-            else:
-                if(self._accept('ELSE')):
-                    stmtval = self.stmt()
-            return True
+            ifstmt = self.tok
+            opNode = Node(self.tok)
+            opNode.left = self.expr()
+
+            # in order to keep use Binary Tree
+            ifstmt.type = 'IFSTMT'
+            ifstmt.value = 'IFSTMT'
+            opNode.right = Node(ifstmt)
+            if not self._accept('THEN'):
+                raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + 'THEN')
+            opNode.right.left = Node(self.tok)
+            opNode.right.left.left = self.stmt()
+            if not self._accept('ELSE'):
+                raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + 'ELSE')
+            opNode.right.right = Node(self.tok)
+            opNode.right.right.left = self.stmt()
+            return opNode
+
         elif self._accept('WHILE'):
-            exprval = self.expr()
-            self._expect('DO')
-            stmtval = self.stmt()
-            return True
+            opNode = Node(self.tok)
+            opNode.left = self.expr()
+            if not self._accept('DO'):
+                raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + 'DO')
+            opNode.right = Node(self.tok)
+            opNode.right.left = self.stmt()
+            return opNode
+
         elif self._accept('INPUT'):
-            self._expect('ID')
-            print "Please input an Integer for "+ self.tok.value +" :"
-            n = int(raw_input())
-            self.vardic[self.tok.value] = n
-            return True
+            opNode = Node(self.tok)
+            if not self._accept('ID'):
+                raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + 'ID')
+            opNode.left = Node(self.tok)
+            return opNode
+
         elif self._accept('ID'):
             idNode = Node(self.tok)
-            if self._accept('ASSIGN'):
-                opNode = Node(self.tok)
-                opNode.left = idNode
-                opNode.right = self.expr(opNode)
+            if not self._accept('ASSIGN'):
+                raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + 'ASSIGN')
+
+            opNode = Node(self.tok)
+            opNode.left = idNode
+            opNode.right = self.expr()
             return opNode
         
         elif self._accept('WRITE'):
-            exprval = self.expr()
-            print exprval
-            return True
-        elif self._accept('BEGIN'):
-            while self.stmt():
-                self._expect('SEMICOLON')
-            self._expect('END')
-            return True
-        else:
-            # raise SyntaxError('Expected IF/WHILE/INPUT/ID/WRITE/BEGIN')
-            return False
+            opNode = Node(self.tok)
+            opNode.left = self.expr()
+            return opNode
 
-# Grammar rules follow
+        elif self._accept('BEGIN'):
+            opNode = Node(self.tok)
+            tmp = opNode
+            tmp.left = self.stmt()
+            while tmp.left:
+
+                if not self._accept('SEMICOLON'):
+                    raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + 'SEMICOLON')
+                tmp.right = Node(self.tok)
+                tmp = tmp.right
+                tmp.left = self.stmt()
+
+            if not self._accept('END'):
+                raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected ' + 'END')
+            return opNode
+
+        else:
+            # raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected IF/WHILE/INPUT/ID/WRITE/BEGIN')
+            return None
+
+
+
     def expr(self):
         left = self.term()
 
         while self._accept('ADD') or self._accept('SUB'):
             opNode = Node(self.tok)
             opNode.left = left
-            print "exp: left = "+left.token.value;
             left = opNode
-            print "then exp: left = "+left.token.value;
             opNode.right = self.term()
         return left
 
@@ -105,9 +141,7 @@ class ExpressionEvaluator:
         while self._accept('MUL') or self._accept('DIV'):
             opNode = Node(self.tok)
             opNode.left=left
-            print "term: left = "+left.token.value;
             left = opNode
-            print "then term: left = "+left.token.value;
             opNode.right=self.factor()
         return left
 
@@ -126,14 +160,14 @@ class ExpressionEvaluator:
             if self._accept('NUM'):
                 f.left = Node(self.tok)
             else:
-                raise SyntaxError('Expected NUM after SUB')
+                raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected NUM after SUB')
 
         elif self._accept('ID'):
             f = Node(self.tok)
-            if not self.vardic.has_key(self.tok.value):
-                raise SyntaxError('Variable need assign value first : '+self.tok.value)
+            # if not self.vardic.has_key(self.tok.value):
+            #     raise SyntaxError('Line: '+'Variable need assi gn value first : '+self.tok.value)
         else:
-            raise SyntaxError('Expected NUMBER or LPAREN')
+            raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected NUMBER or LPAREN')
         return f
 
 
@@ -142,7 +176,7 @@ def descent_parser():
     e = ExpressionEvaluator()
     file = open('test.txt', "r+")
     data = file.read()
-    print("Finished Result: " + str(e.parse(data)))
+    print(str(e.parse(data)))
 
 if __name__ == '__main__':
     descent_parser()
