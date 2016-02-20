@@ -25,15 +25,11 @@ class ExpressionEvaluator:
         self.vardic = {}
 
         ast = self.stmt()
+
         result = str(ast)
         print result
-        # self.minPrint(result)
-
-    def minPrint(self, str):
-        import csv
-        reader = csv.reader(str)
-        for column in zip(*reader):
-            print column
+        ast.posorder()
+        #print ast.posorder() #this print the tree in post order in a list
 
     def _advance(self):
         'Advance one token ahead'

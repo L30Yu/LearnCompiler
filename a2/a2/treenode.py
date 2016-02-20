@@ -1,15 +1,5 @@
 class Node:
-    # """
-    # >>> t = BinTree(6, BinTree(2, BinTree(0), BinTree(4)), BinTree(10, BinTree(8)))
-    # >>> t
-    # BinTree(6, BinTree(2, BinTree(0), BinTree(4)), BinTree(10, BinTree(8)))
-    # >>> print(t)
-    #   -6-
-    #  /   \
-    #  2   10
-    # / \ /  \
-    # 0 4 8 12
-    # """
+
     def __init__(self, entry=None, left=None, right=None):
         if not entry:
             value = None
@@ -29,8 +19,129 @@ class Node:
     def __str__(self): # used by print() and str()
         return tree_string(self)
 
+    def posorder(self):
+        print
+        return postorder(self)
 
-# Tree printing functions, kindly provided by Joseph Hui. #
+
+jumpCount = 1
+#post order traverse the tree to generate code
+def postorder(tree):
+    global jumpCount
+
+    type1 = ['ADD','SUB','MUL','DIV']
+    jumpStack = []
+
+    def recurse(node):
+        global  jumpCount
+        if not node:
+            return
+
+        # prepare IF or WHILE statement
+        tmp = None
+
+        # prepare for condition loop
+        if node.token.type == 'IFSTMT' and node.entry == ' IF,if ':
+            tmp = node
+        elif node.token.type == 'IFSTMT' and node.entry == ' IFSTMT,IFSTMT ':
+            tmp = node
+        elif node.token.type == 'WHILE':
+            tmp = node
+            newJump = 'L'+str(jumpCount)
+            jumpCount += 1
+            jumpStack.append(newJump)
+            print '\n'+newJump+':'
+
+        recurse(node.left)
+
+        if tmp!=None and tmp.right == node.right and node.entry in [' IF,if ',' WHILE,while ']:
+            if tmp.left.token.type == 'ID':
+                if tmp.left.left == None and tmp.left.right == None:
+                    print '\trPUSH '+tmp.left.token.value
+            newJump = 'L'+str(jumpCount)
+            jumpCount += 1
+            jumpStack.append(newJump)
+            print '\tcJUMP '+newJump
+
+        # before right node, prepare for THEN ELSE DO
+        if tmp!= None and tmp ==node and node.token.type == 'IFSTMT' and node.entry == ' IFSTMT,IFSTMT ' and node.left.token.type == 'THEN':
+            lastJump = jumpStack.pop()
+            newJump = 'L'+str(jumpCount)
+            jumpCount += 1
+            jumpStack.append(newJump)
+            print '\tJUMP '+newJump
+            print '\n'+lastJump+':'
+        # elif tmp!= None and tmp.right == node and node.token.type == 'DO':
+        #     lastJump2Back = jumpStack.pop()
+        #     lastJump = jumpStack.pop()
+        #     print '\tJUMP '+lastJump
+        #     jumpStack.append(lastJump2Back)
+
+
+
+        recurse(node.right)
+
+        if tmp!= None and tmp ==node and node.token.type == 'IFSTMT' and node.entry == ' IFSTMT,IFSTMT ' and node.right.token.type == 'ELSE':
+            lastJump = jumpStack.pop()
+            # newJump = 'L'+str(jumpCount)
+            # jumpCount += 1
+            # jumpStack.append(newJump)
+            # print '\tJUMP '+newJump
+            print '\n'+lastJump+':'
+        elif tmp!= None and tmp ==node and node.token.type == 'WHILE':
+            lastJump2Back = jumpStack.pop()
+            lastJump = jumpStack.pop()
+            print '\tJUMP '+lastJump
+            # jumpStack.append(lastJump2Back)
+            print '\n'+lastJump2Back+':'
+
+        if node.token.type in type1:
+
+            if node.left and node.left.token:
+                if node.left.token.type == 'NUM':
+                    print '\tcPUSH '+node.left.token.value
+                elif node.left.token.type == 'ID':
+                    print '\trPUSH '+node.left.token.value
+
+            if node.right and node.right.token:
+                if node.right.token.type == 'NUM':
+                    print '\tcPUSH '+node.right.token.value
+                elif node.right.token.type == 'ID':
+                    print '\trPUSH '+node.right.token.value
+
+            if node.left and node.right:
+                print '\tOP2 '+node.token.value
+            elif node.left or node.right:
+                print '\tOP1 '+node.token.value
+
+        elif node.token.type == 'ASSIGN':
+            if node.right and node.right.token:
+                if node.right.token.type == 'NUM':
+                    print '\tcPUSH '+node.right.token.value
+                elif node.right.token.type == 'ID':
+                    print '\trPUSH '+node.right.token.value
+            if node.left and node.left.token:
+                if node.left.token.type == 'ID':
+                    print '\tLOAD '+node.left.token.value
+
+        elif node.token.type == 'WRITE':
+            if node.left and node.left.token:
+                if node.left.token.type == 'ID':
+                    print '\trPUSH '+node.left.token.value
+            print '\tPRINT'
+
+        elif node.token.type == 'INPUT':
+            if node.left and node.left.token:
+                if node.left.token.type == 'ID':
+                    print '\tREAD '+node.left.token.value
+
+        # elif node.token.type == 'IF':
+
+
+    recurse(tree)
+    print
+    print jumpStack
+    return
 
 def tree_string(tree):
     return "\n".join(tree_block(tree)[0])
