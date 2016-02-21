@@ -10,7 +10,7 @@ class ExpressionEvaluator:
     implements a single grammar rule. Use the ._accept() method
     to test and accept the current lookahead token. Use the ._expect()
     method to exactly match and discard the next token on on the input
-    (or raise a SyntaxError 'Line: '+if it doesn't match ).
+    (or raise a SyntaxError 'Line: line number'+if it doesn't match ).
     '''
 
     def parse(self, text):
@@ -25,11 +25,14 @@ class ExpressionEvaluator:
         self.vardic = {}
 
         ast = self.stmt()
-
         result = str(ast)
         print result
+        with open("TestFiles/output_Tree.txt", "w") as text_file:
+            text_file.write("{0}".format(result))
+        text_file.close()
+        # post order traverse the tree to generate code
         ast.posorder()
-        #print ast.posorder() #this print the tree in post order in a list
+
 
     def _advance(self):
         'Advance one token ahead'
@@ -116,7 +119,6 @@ class ExpressionEvaluator:
             return opNode
 
         else:
-            # raise SyntaxError('Line: ' + str(self.tok.lineno) + ' Expected IF/WHILE/INPUT/ID/WRITE/BEGIN')
             return None
 
 
@@ -170,9 +172,17 @@ class ExpressionEvaluator:
 
 def descent_parser():
     e = ExpressionEvaluator()
-    file = open('test.txt', "r+")
+    if(len(sys.argv) != 2):
+        print "Please input a testing file path"
+        sys.exit(0)
+    file = open(sys.argv[1], "r+")
     data = file.read()
-    str(e.parse(data))
+    e.parse(data)
+    print "Tree and Code saved in TestFiles/output_Tree.txt and output_Code.txt"
+    print
+    print "Close Word Wrap when you browsing the tree"
+
+
 
 if __name__ == '__main__':
     descent_parser()

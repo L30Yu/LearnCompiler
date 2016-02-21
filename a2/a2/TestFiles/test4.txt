@@ -1,0 +1,9 @@
+/* Test 1: For testing begin end with statements  */
+begin
+kk:=3;
+	while kk do 
+		begin
+			kk:=kk-1;
+			write kk;
+		end;
+end

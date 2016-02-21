@@ -1,0 +1,6 @@
+/* Test 1: For testing begin end with statements  */
+begin
+	input x234;  
+	if x234 then x1:=0
+		else write x2;
+end

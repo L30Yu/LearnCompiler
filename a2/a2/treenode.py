@@ -23,10 +23,12 @@ class Node:
         print
         return postorder(self)
 
+stackCode = ""
 
 jumpCount = 1
 #post order traverse the tree to generate code
 def postorder(tree):
+    global stackCode
     global jumpCount
 
     type1 = ['ADD','SUB','MUL','DIV']
@@ -34,6 +36,8 @@ def postorder(tree):
 
     def recurse(node):
         global  jumpCount
+        global  stackCode
+
         if not node:
             return
 
@@ -51,6 +55,8 @@ def postorder(tree):
             jumpCount += 1
             jumpStack.append(newJump)
             print '\n'+newJump+':'
+            stackCode += '\n'+newJump+':'+'\n'
+
 
         recurse(node.left)
 
@@ -58,10 +64,12 @@ def postorder(tree):
             if tmp.left.token.type == 'ID':
                 if tmp.left.left == None and tmp.left.right == None:
                     print '\trPUSH '+tmp.left.token.value
+                    stackCode += '\trPUSH '+tmp.left.token.value+'\n'
             newJump = 'L'+str(jumpCount)
             jumpCount += 1
             jumpStack.append(newJump)
             print '\tcJUMP '+newJump
+            stackCode += '\tcJUMP '+newJump+'\n'
 
         # before right node, prepare for THEN ELSE DO
         if tmp!= None and tmp ==node and node.token.type == 'IFSTMT' and node.entry == ' IFSTMT,IFSTMT ' and node.left.token.type == 'THEN':
@@ -70,12 +78,9 @@ def postorder(tree):
             jumpCount += 1
             jumpStack.append(newJump)
             print '\tJUMP '+newJump
+            stackCode += '\tJUMP '+newJump+'\n'
             print '\n'+lastJump+':'
-        # elif tmp!= None and tmp.right == node and node.token.type == 'DO':
-        #     lastJump2Back = jumpStack.pop()
-        #     lastJump = jumpStack.pop()
-        #     print '\tJUMP '+lastJump
-        #     jumpStack.append(lastJump2Back)
+            stackCode += '\n'+lastJump+':'+'\n'
 
 
 
@@ -87,74 +92,85 @@ def postorder(tree):
             # jumpCount += 1
             # jumpStack.append(newJump)
             # print '\tJUMP '+newJump
+            stackCode += '\tJUMP '+newJump+'\n'
             print '\n'+lastJump+':'
+            stackCode += '\n'+lastJump+':'+'\n'
         elif tmp!= None and tmp ==node and node.token.type == 'WHILE':
             lastJump2Back = jumpStack.pop()
             lastJump = jumpStack.pop()
             print '\tJUMP '+lastJump
+            stackCode += '\tJUMP '+lastJump+'\n'
             # jumpStack.append(lastJump2Back)
             print '\n'+lastJump2Back+':'
+            stackCode += '\n'+lastJump2Back+':'+'\n'
 
         if node.token.type in type1:
 
             if node.left and node.left.token:
                 if node.left.token.type == 'NUM':
                     print '\tcPUSH '+node.left.token.value
+                    stackCode += '\tcPUSH '+node.left.token.value+'\n'
                 elif node.left.token.type == 'ID':
                     print '\trPUSH '+node.left.token.value
+                    stackCode += '\trPUSH '+node.left.token.value+'\n'
 
             if node.right and node.right.token:
                 if node.right.token.type == 'NUM':
                     print '\tcPUSH '+node.right.token.value
+                    stackCode += '\tcPUSH '+node.right.token.value+'\n'
                 elif node.right.token.type == 'ID':
                     print '\trPUSH '+node.right.token.value
+                    stackCode += '\trPUSH '+node.right.token.value+'\n'
 
             if node.left and node.right:
                 print '\tOP2 '+node.token.value
+                stackCode += '\tOP2 '+node.token.value+'\n'
             elif node.left or node.right:
                 print '\tOP1 '+node.token.value
+                stackCode += '\tOP1 '+node.token.value+'\n'
 
         elif node.token.type == 'ASSIGN':
             if node.right and node.right.token:
                 if node.right.token.type == 'NUM':
                     print '\tcPUSH '+node.right.token.value
+                    stackCode += '\tcPUSH '+node.right.token.value+'\n'
                 elif node.right.token.type == 'ID':
                     print '\trPUSH '+node.right.token.value
+                    stackCode += '\trPUSH '+node.right.token.value+'\n'
             if node.left and node.left.token:
                 if node.left.token.type == 'ID':
                     print '\tLOAD '+node.left.token.value
+                    stackCode += '\tLOAD '+node.left.token.value+'\n'
 
         elif node.token.type == 'WRITE':
             if node.left and node.left.token:
                 if node.left.token.type == 'ID':
                     print '\trPUSH '+node.left.token.value
+                    stackCode += '\trPUSH '+node.left.token.value+'\n'
             print '\tPRINT'
+            stackCode += '\tPRINT'+'\n'
 
         elif node.token.type == 'INPUT':
             if node.left and node.left.token:
                 if node.left.token.type == 'ID':
                     print '\tREAD '+node.left.token.value
+                    stackCode += '\tREAD '+node.left.token.value+'\n'
 
         # elif node.token.type == 'IF':
 
 
     recurse(tree)
     print
-    # print jumpStack
+    with open("TestFiles/output_Code.txt", "w") as text_file:
+        text_file.write("{0}".format(stackCode))
+    text_file.close()
     return
 
 def tree_string(tree):
     return "\n".join(tree_block(tree)[0])
 
 def tree_block(tree):
-    """Returns a list of strings, each string being
-    one line in a rectangle of text representing the
-    tree.
-    Also returns the index in the string which is
-    centered above the tree's root.
 
-    num_width: The width of the widest number in the tree (100 => 3)
-    """
     #If no children, just return string
     if tree.left is None and tree.right is None:
         return [str(tree.entry)], len(str(tree.entry))//2

@@ -1,0 +1,7 @@
+/* Test 1: For testing begin end with statements  */
+begin
+	x:= 2+ ;  /* Test syntax error, will arise error
+	x:=x*2-1;	*/
+%	write x;
+
+end
