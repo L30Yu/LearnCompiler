@@ -172,7 +172,7 @@ def descent_parser():
     e = ExpressionEvaluator()
     file = open('test.txt', "r+")
     data = file.read()
-    print(str(e.parse(data)))
+    str(e.parse(data))
 
 if __name__ == '__main__':
     descent_parser()

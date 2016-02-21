@@ -1,0 +1,21 @@
+	READ x
+	READ y
+
+L1:
+	rPUSH x
+	rPUSH y
+	OP2 -
+	cJUMP L2
+	rPUSH x
+	LOAD z
+	rPUSH x
+	rPUSH y
+	OP2 -
+	LOAD x
+	rPUSH x
+	LOAD y
+	JUMP L1
+
+L2:
+	rPUSH y
+	PRINT

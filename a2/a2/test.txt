@@ -1,19 +1,11 @@
+/* A single missed character can be fatal ....  */
 begin
-begin
-if y then x:= 10
-       else x:= 1;
-z:= z * x;
-end;
-
-
-while k do
-    begin
-        kk:=22;
-        kk:=33;
-        if kk then kk:=44 else kk:=55;
-    end;
-
-
-x:=0;
-%if y then y:=1 else y:=2;
+  input x; input y;
+  while x-y do
+       begin
+         z:= x;
+         x:= x-y;
+         y := x;
+       end;
+  write y;
 end

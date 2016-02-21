@@ -140,7 +140,7 @@ def postorder(tree):
 
     recurse(tree)
     print
-    print jumpStack
+    # print jumpStack
     return
 
 def tree_string(tree):
