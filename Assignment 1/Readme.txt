@@ -1,8 +1,6 @@
 CPSC 411 Winter 2016
 Assignment 1
-Delei Yu
-10061950
-dyu@ucalgary.ca
+
 
 Software & System:
 Python 2.7.10
