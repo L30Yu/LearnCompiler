@@ -1,5 +1,5 @@
 CPSC 411 Winter 2016 Assignment 2
-Delei Yu  10061950   dyu@ucalgary.ca
+
 
 Software & System: Python 2.7.10; PLY (Python Lex) Version 3.8; Windows 10 64-bit; Mac OS X EI Capitan 10.11.3
 
