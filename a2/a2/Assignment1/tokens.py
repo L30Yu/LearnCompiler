@@ -1,9 +1,5 @@
 # CPSC 411 Winter 2016
 # Assignment 1
-# Delei Yu
-# 10061950
-# dyu@ucalgary.ca
-#
 # tokens.py
 # use lex to define tokens
 #
