@@ -7,13 +7,14 @@ Compile and Run:
 1. change directory to A4
 2. run "make" 
 3. run ./run_parser.sh tests/test1.m+
+(make .sh file executable with chmod a+x run_parser.sh)
 
 -----------------------------------------------------------------------------
 
 Sample:
 
 [dyu@localhost A4]$ make
-
+javac -cp java_cup-runtime.jar *java 
 [dyu@localhost A4]$ ./run_parser.sh tests/test1.m+
 Parsing [tests/test1.m+]
                                                                                                                                                                                
