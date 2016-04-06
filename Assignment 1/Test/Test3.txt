@@ -1,0 +1,14 @@
+no comments
+if a then b:=(10+6/3)
+
+else do 11s11e11
+
+while b*2
+
+then input
+
+write
+
+end 
+
+begin 

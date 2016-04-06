@@ -1,0 +1,23 @@
+	cPUSH 3
+	LOAD kk
+
+L1:
+	rPUSH kk
+	cJUMP L2
+	rPUSH kk
+	cJUMP L3
+	rPUSH kk
+	cPUSH 1
+	OP2 -
+	LOAD kk
+	JUMP L4
+
+L3:
+	rPUSH kk
+	PRINT
+	JUMP L4
+
+L4:
+	JUMP L1
+
+L2:

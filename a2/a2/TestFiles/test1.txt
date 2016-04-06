@@ -1,0 +1,7 @@
+/* Test 1: For testing begin end with statements  */
+begin
+input x;
+    z:= x+1*2;
+write z;
+
+end

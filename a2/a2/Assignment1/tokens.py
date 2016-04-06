@@ -6,19 +6,20 @@
 
 import sys
 sys.path.insert(0,"../..")
-
-import ply.lex as lex
 import re
+import lex as lex
+
 
 # my own multi-line comments validation
 import validatecomms
 
 # check input arguments and read txt file
-if(len(sys.argv) != 2):
-    print "Please input a testing file path"
-    sys.exit(0)
-file = open(sys.argv[1], "r+")
-data = file.read()
+# if(len(sys.argv) != 2):
+#     print "Please input a testing file path"
+#     sys.exit(0)
+# file = open(sys.argv[1], "r+")
+# data = file.read()
+data = ""
 
 # Reserved words
 reserved = (
@@ -129,14 +130,14 @@ lexer.comm_beyondpos = []
 
 
 # Give the lexer input
-lexer.input(data)
+# lexer.input(data)
 
 # Tokenize
-while True:
-    tok = lexer.token()
-    if not tok:
-        break      # No more input
-    print("TOKEN", tok.type, tok.value, (tok.lineno), (tok.lexpos))
-
-
+# while True:
+#     tok = lexer.token()
+#     if not tok:
+#         break      # No more input
+#     print("TOKEN", tok.type, tok.value, (tok.lineno), (tok.lexpos))
+#
+#
 
