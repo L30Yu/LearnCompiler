@@ -1,0 +1,11 @@
+var x:int;
+var y:int;
+var a: bool;
+fun f(a:int,b:int):bool
+   {begin return a > b; end};
+fun exp(e:int,k:int):bool
+	{begin return e > k; end};
+begin
+   read x;read y;
+   a := f(y,x); print a;
+end
