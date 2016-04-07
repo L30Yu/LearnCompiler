@@ -6,7 +6,7 @@ Need install jflex
 Compile and Run:
 1. change directory to A4
 2. run "make" 
-3. run ./run_parser.sh tests/test1.m+
+3. run ./run_parser.sh tests/test1.txt
 (make .sh file executable with chmod a+x run_parser.sh)
 
 -----------------------------------------------------------------------------
@@ -15,8 +15,8 @@ Sample:
 
 [dyu@localhost A4]$ make
 javac -cp java_cup-runtime.jar *java 
-[dyu@localhost A4]$ ./run_parser.sh tests/test1.m+
-Parsing [tests/test1.m+]
+[dyu@localhost A4]$ ./run_parser.sh tests/test1.txt
+Parsing [tests/test1.txt]
                                                                                                                                                                                
 AST:                                                                                                                                                                            
 M_prog (                                                                                                                                                                        
@@ -59,8 +59,8 @@ IFUN
                                                                                                                                                                                 
 Semantics are good          
 [dyu@localhost A4]$
-[dyu@localhost A4]$ ./run_parser.sh tests/test2.m+
-Parsing [tests/test2.m+]
+[dyu@localhost A4]$ ./run_parser.sh tests/test2.txt
+Parsing [tests/test2.txt]
 
 AST: 
 M_prog (
@@ -92,8 +92,8 @@ IPROG (
 
 Semantics are good
 
-[dyu@localhost A4]$ ./run_parser.sh tests/test3.m+
-Parsing [tests/test3.m+]
+[dyu@localhost A4]$ ./run_parser.sh tests/test3.txt
+Parsing [tests/test3.txt]
 
 AST: 
 M_prog (
@@ -123,8 +123,8 @@ IPROG (
 
 Semantics are good
 [dyu@localhost A4]$
-[dyu@localhost A4]$ ./run_parser.sh tests/test4.m+
-Parsing [tests/test4.m+]
+[dyu@localhost A4]$ ./run_parser.sh tests/test4.txt
+Parsing [tests/test4.txt]
 
 AST: 
 M_prog (
